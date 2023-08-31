@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "sweeper"
+version = "0.1.0"
+description = "A minesweeper implementation and solver"
+authors = ["fuverdred <fred.cook@bristol.ac.uk>"]
+license = "GNU2"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+numpy = "^1.20"
+pillow = "^9.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
