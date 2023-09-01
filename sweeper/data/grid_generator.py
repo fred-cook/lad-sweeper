@@ -8,7 +8,11 @@ class GridGenerator:
     A small class to generate lad sweeper grids.
 
     Grids are 2d NumPy arrays with -1 denoting a mine
-    and a count for the number of adjacent mines.    
+    and a count for the number of adjacent mines.
+
+    To generate a list of grids use the following:
+    >>> grid_gen = GridGenerator()
+    >>> my_grids = [next(grid_gen) for _ in range(10)]
     """
     def __init__(self,
                  grid_shape: Tuple[int, int] = (16, 16),
