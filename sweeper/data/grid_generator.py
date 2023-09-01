@@ -58,9 +58,9 @@ class GridGenerator:
         """
         np.random.shuffle(self.coords) #  in place
         board = np.zeros(self.grid_shape, dtype=np.int8)
-        board[self.coords[:self.num_mines]] = -1
+        board[tuple(self.coords[:self.num_mines].T)] = -1
 
         self.padded_grid[1:-1, 1:-1] = board
         counts = np.abs(np.sum(self.neighbours, axis=(3, 2)))
-        counts[self.coords[:self.num_mines]] = -1 # reset the mines
+        counts[tuple(self.coords[:self.num_mines].T)] = -1 # reset the mines
         return counts
