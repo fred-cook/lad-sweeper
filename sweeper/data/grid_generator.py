@@ -37,6 +37,12 @@ class GridGenerator:
         
         # Store a list of coords
         self.coords = np.indices(grid_shape).reshape(2, -1).T
+
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        return self.make_grid()
         
     def make_grid(self) -> np.ndarray:
         """
@@ -64,3 +70,4 @@ class GridGenerator:
         counts = np.abs(np.sum(self.neighbours, axis=(3, 2)))
         counts[tuple(self.coords[:self.num_mines].T)] = -1 # reset the mines
         return counts
+    
