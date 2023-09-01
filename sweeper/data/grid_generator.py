@@ -36,7 +36,7 @@ class GridGenerator:
                                      strides=self.padded_grid.strides * 2)
         
         # Store a list of coords
-        self.coords = np.indices(grid_shape).flatten().reshape(2, -1).T
+        self.coords = np.indices(grid_shape).reshape(2, -1).T
         
     def make_grid(self) -> np.ndarray:
         """
