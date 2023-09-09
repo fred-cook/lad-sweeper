@@ -17,7 +17,7 @@ root = Tk()
 class LadSweeperApp():
 
     BUTTON_SIZE = 50 # pixels
-    FONT = Font(family="TkDefaultFont", size=5, weight="bold")
+    FONT = Font(family="Minesweeper", size=16, weight="bold")
     ZERO_IMAGE = PhotoImage(width=0, height=0)
 
     colours = {1: "blue",
@@ -95,6 +95,7 @@ class LadSweeperApp():
                                 height=self.BUTTON_SIZE,
                                 font=self.FONT,
                                 bd=1,
+                                relief="raised",
                                 compound="center") # allow text to be shown
                 buttons[i].append(button)
                 buttons[i][j].bind("<Button-1>", lambda _, coord=(i, j): self.on_click(coord))
@@ -110,7 +111,9 @@ class LadSweeperApp():
 
         for i, j in self.game.click_cell(coord):
             value = self.game.board[i, j]
-            self.buttons[i][j].config(relief="solid")
+            self.buttons[i][j].config(bg="black")
+            self.buttons[i][j].config(height=self.BUTTON_SIZE-2,
+                                      width=self.BUTTON_SIZE-2)
             if value:
                 self.buttons[i][j].config(text=str(value),
                                           fg=self.colours[value])
