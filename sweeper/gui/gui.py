@@ -17,7 +17,7 @@ root = tk.Tk()
 class LadSweeperApp():
 
     BUTTON_SIZE = 50 # pixels
-    FONT = Font(family="Minesweeper", size=20, weight="bold")
+    FONT = Font(family="Arial Rounded MT Bold", size=20)
     ZERO_IMAGE = tk.PhotoImage(width=0, height=0)
 
     colours = {1: "blue",
@@ -34,7 +34,7 @@ class LadSweeperApp():
         "font": FONT,
         "image": tk.PhotoImage(width=0, height=0),
         "relief": "raised",
-        "bg": "#f2cd7e",
+        #"bg": "#f2cd7e",
         "state": tk.ACTIVE,
         "compound": "center",
         "height": BUTTON_SIZE,
@@ -43,10 +43,11 @@ class LadSweeperApp():
 
     CLICKED = {
         "relief": "solid",
-        "bg": "#fcfbf7",
+        #"bg": "#fcfbf7",
         "state": tk.DISABLED,
         "width": BUTTON_SIZE - 2,
-        "height": BUTTON_SIZE-2,
+        "height": BUTTON_SIZE - 2,
+        "bd": 1,
     }
 
     def __init__(self,
@@ -123,10 +124,10 @@ class LadSweeperApp():
 
         for i, j in self.game.click_cell(coord):
             value = self.game.board[i, j]
-            self.buttons[i][j].config(**self.CLICKED)
             if value:
                 self.buttons[i][j].config(text=str(value),
-                                          fg="red") #self.colours[value])
+                                          fg=self.colours[value])
+            self.buttons[i][j].config(**self.CLICKED)
         if self.game.game_won is not None:
             self.reveal_board(coord) # need the coord incase it was a mine
         
