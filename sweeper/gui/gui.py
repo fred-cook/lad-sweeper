@@ -1,7 +1,7 @@
 from typing import Tuple, List
 
 from pathlib import Path
-from tkinter import Tk, ttk, Button, Frame, PhotoImage, TOP
+import tkinter as tk
 from tkinter.font import Font
 
 from PIL import Image, ImageTk
@@ -11,14 +11,14 @@ import numpy as np
 from sweeper.lad_sweeper import LadSweeper
 
 
-root = Tk()
+root = tk.Tk()
 
 
 class LadSweeperApp():
 
     BUTTON_SIZE = 50 # pixels
-    FONT = Font(family="TkDefaultFont", size=5, weight="bold")
-    ZERO_IMAGE = PhotoImage(width=0, height=0)
+    FONT = Font(family="Minesweeper", size=20, weight="bold")
+    ZERO_IMAGE = tk.PhotoImage(width=0, height=0)
 
     colours = {1: "blue",
                2: "green",
@@ -28,31 +28,52 @@ class LadSweeperApp():
                6: "Turquoise",
                7: "black",
                8: "gray"}
+    
+    UNCLICKED = {
+        "text": '',
+        "font": FONT,
+        "image": tk.PhotoImage(width=0, height=0),
+        "relief": "raised",
+        "bg": "#f2cd7e",
+        "state": tk.ACTIVE,
+        "compound": "center",
+        "height": BUTTON_SIZE,
+        "width": BUTTON_SIZE,
+    }
+
+    CLICKED = {
+        "relief": "solid",
+        "bg": "#fcfbf7",
+        "state": tk.DISABLED,
+        "width": BUTTON_SIZE - 2,
+        "height": BUTTON_SIZE-2,
+    }
 
     def __init__(self,
-                 master: Tk,
+                 master: tk.Tk,
                  shape: Tuple[int, int]=(16, 30),
                  num_mines: int=99):
         self.master = master
-        master.title("Ladsweeper")
+        master.title("LadSweeper")
 
         self.shape = shape
         self.num_mines = num_mines
         self.game = LadSweeper(shape=shape, num_mines=num_mines)
-
-        self.buttons_frame = Frame(master)
-        self.buttons  = self.make_buttons(self.buttons_frame, *shape)
-        self.buttons_frame.pack()
-        self.flags: List[Tuple[int, int]]=[]
         self.images = self.get_images()
 
-        self.new_game_button: Button
+        self.new_game_button: tk.Button
         self.banner = self.make_banner(master)
-        self.banner.pack(side=TOP)
+        self.banner.pack(side=tk.TOP)
+
+        self.buttons_frame = tk.Frame(master)
+        self.buttons  = self.make_buttons(self.buttons_frame, *shape)
+        self.buttons_frame.pack(side=tk.BOTTOM)
+        self.flags: List[Tuple[int, int]]=[]
+
 
     def make_banner(self, master):
-        banner = Frame(master)
-        self.new_game_button = Button(banner,
+        banner = tk.Frame(master)
+        self.new_game_button = tk.Button(banner,
                                       image=self.images["lad"],
                                       height=self.BUTTON_SIZE,
                                       width=self.BUTTON_SIZE,
@@ -69,9 +90,7 @@ class LadSweeperApp():
     def reset_buttons(self):
         for row in self.buttons:
             for button in row:
-                button.config(text='',
-                              image=self.ZERO_IMAGE,
-                              relief="raised")
+                button.config(**self.UNCLICKED)
 
     def get_images(self):
         image_root = Path("sweeper/images")
@@ -84,22 +103,16 @@ class LadSweeperApp():
         return images
 
 
-    def make_buttons(self, master, rows, columns) -> List[List[Button]]:
+    def make_buttons(self, master, rows, columns) -> List[List[tk.Button]]:
         buttons = [[] for _  in range(rows)]
         
         for i in range(rows):
             for j in range(columns):
-                button = Button(master=master,
-                                image=self.ZERO_IMAGE,
-                                width=self.BUTTON_SIZE,
-                                height=self.BUTTON_SIZE,
-                                font=self.FONT,
-                                bd=1,
-                                compound="center") # allow text to be shown
+                button = tk.Button(master=master, **self.UNCLICKED)
                 buttons[i].append(button)
                 buttons[i][j].bind("<Button-1>", lambda _, coord=(i, j): self.on_click(coord))
                 buttons[i][j].bind("<Button-3>", lambda _, coord=(i, j): self.on_right_click(coord))
-                buttons[i][j].grid(row=i, column=j)
+                buttons[i][j].grid(row=i, column=j, padx=1, pady=1)
         return buttons
 
     def on_click(self, coord: Tuple[int, int]):
@@ -110,10 +123,10 @@ class LadSweeperApp():
 
         for i, j in self.game.click_cell(coord):
             value = self.game.board[i, j]
-            self.buttons[i][j].config(relief="solid")
+            self.buttons[i][j].config(**self.CLICKED)
             if value:
                 self.buttons[i][j].config(text=str(value),
-                                          fg=self.colours[value])
+                                          fg="red") #self.colours[value])
         if self.game.game_won is not None:
             self.reveal_board(coord) # need the coord incase it was a mine
         
