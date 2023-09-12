@@ -155,11 +155,11 @@ class LadSweeperApp():
                     button.config(image=img,
                                   relief="solid")
                 elif (i, j) in self.flags:
-                    button.config(image=self.images["incorrect_flag"])
+                    button.config(bg="red")
                 else:
                     self.on_click((i, j))
         if self.game.game_won is False:
-            self.buttons[coord[0]][coord[1]].config(image=self.images["losing_lad"])
+            self.buttons[coord[0]][coord[1]].config(bg="red")
 
 
 if __name__ == "__main__":
