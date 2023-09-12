@@ -35,6 +35,10 @@ class ImageHandler:
     
     @size.setter
     def size(self, value: int) -> None:
+        """
+        Set the new size value, and make sure all of the
+        images are resized
+        """
         self._size = value
         self.images = {key: ImageTk.PhotoImage(img.resize((value, value)))
                         for key, img in self.raw_images.items()}
