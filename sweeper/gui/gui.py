@@ -10,6 +10,8 @@ import numpy as np
 
 from sweeper.lad_sweeper import LadSweeper
 
+from sweeper.gui.image_handler import ImageHandler
+
 
 root = tk.Tk()
 
@@ -60,7 +62,7 @@ class LadSweeperApp():
         self.shape = shape
         self.num_mines = num_mines
         self.game = LadSweeper(shape=shape, num_mines=num_mines)
-        self.images = self.get_images()
+        self.images = ImageHandler(self.BUTTON_SIZE)
 
         self.new_game_button: tk.Button
         self.banner = self.make_banner(master)
@@ -92,17 +94,6 @@ class LadSweeperApp():
         for row in self.buttons:
             for button in row:
                 button.config(**self.UNCLICKED)
-
-    def get_images(self):
-        image_root = Path("sweeper/images")
-        images = [Image.open(path) for path in image_root.iterdir()]
-        names = [path.stem for path in image_root.iterdir()]
-        images = [img.resize((self.BUTTON_SIZE-2, self.BUTTON_SIZE-2))
-                  for img in images]
-        images = {name: ImageTk.PhotoImage(img)
-                  for name, img in zip(names, images)}
-        return images
-
 
     def make_buttons(self, master, rows, columns) -> List[List[tk.Button]]:
         buttons = [[] for _  in range(rows)]
