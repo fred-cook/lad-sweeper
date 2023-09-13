@@ -9,6 +9,14 @@ class ImageHandler:
 
     The class can be used like a dictionary where values
     can only be read, not set.
+
+    Images
+    ------
+    lad
+    flag
+    dead_lad
+    lad_rear
+    winning_lad
     """
     def __init__(self, size: int, filepath: Path=Path("assets/images/")):
         """
