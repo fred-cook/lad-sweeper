@@ -49,9 +49,9 @@ class Cell(tk.Button):
             Size of the cell in pixels
         """
         font = Font(family="Arial Rounded MT Bold", size=20)
-        zero_image = tk.PhotoImage(width=0, height=0)
+        self.zero_image = tk.PhotoImage(width=0, height=0)
         self.UNCLICKED["font"] = font
-        self.UNCLICKED["image"] = zero_image
+        self.UNCLICKED["image"] = self.zero_image
 
         self.size = size #  [pixels]
 
