@@ -108,4 +108,4 @@ class Cell(tk.Button):
         self.state = self.STATES.CLICKED
 
     def reset(self):
-        self.config(**self.UNCLICKED)
+        self.config(height=self.size, width=self.size, **self.UNCLICKED)
