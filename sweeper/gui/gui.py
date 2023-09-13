@@ -76,8 +76,7 @@ class LadSweeperApp():
     def on_click(self, coord: Tuple[int, int]):
         for i, j in self.game.click_cell(coord):
             value = self.game.board[i, j]
-            if value:
-                self.buttons[i][j].left_click(value)
+            self.buttons[i][j].left_click(value)
         if self.game.game_won is not None:
             self.reveal_board(coord) # need the coord incase it was a mine
         

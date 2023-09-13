@@ -72,7 +72,8 @@ class Cell(tk.Button):
         if self.state is self.STATES.UNCLICKED:
             self.config(text=str(value) if value > 0 else '',
                         fg=self.COLOURS[value],
-                        bg="gray")
+                        bg="gray",
+                        **self.CLICKED)
             self.state = self.STATES.CLICKED
 
     def right_click(self, flag_image: tk.PhotoImage):
@@ -112,3 +113,4 @@ class Cell(tk.Button):
     def reset(self):
         """Reset to start values"""
         self.config(height=self.size, width=self.size, **self.UNCLICKED)
+        self.state = self.STATES.UNCLICKED
