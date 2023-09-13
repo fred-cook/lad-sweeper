@@ -32,7 +32,6 @@ class Cell(tk.Button):
 
     CLICKED = {
         "relief": "solid",
-        "state": tk.DISABLED,
     }
 
     STATES = IntEnum("state", ("UNCLICKED",
@@ -93,7 +92,7 @@ class Cell(tk.Button):
             self.config(**self.UNCLICKED)
             self.state = self.STATES.UNCLICKED
 
-    def reveal(self, image: tk.PhotoImage, special: bool=False) -> None:
+    def reveal(self, image: tk.PhotoImage | None=None, special: bool=False) -> None:
         """
         Reveal the cell on game being won or lost.
 
@@ -105,7 +104,7 @@ class Cell(tk.Button):
             Used to highlight if it's the mine that triggered
             the loss, or an incorrectly placed flag at the end
         """
-        self.config(image=image,
+        self.config(image=image if image else self.zero_image,
                     **self.CLICKED,
                     bg="red" if special else "gray")
         self.state = self.STATES.CLICKED

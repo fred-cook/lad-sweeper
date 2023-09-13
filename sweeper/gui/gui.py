@@ -74,6 +74,8 @@ class LadSweeperApp():
         return buttons
 
     def on_click(self, coord: Tuple[int, int]):
+        if self.buttons[coord[0]][coord[1]].state is self.buttons[0][0].STATES.CLICKED:
+            return
         for i, j in self.game.click_cell(coord):
             value = self.game.board[i, j]
             self.buttons[i][j].left_click(value)
@@ -105,6 +107,7 @@ class LadSweeperApp():
         for i, row in enumerate(self.buttons):
             for j, button in enumerate(row):
                 value = self.game.board[i][j]
+                button.disable()
                 if value < 0:
                     if (i, j) in self.flags:
                         continue
@@ -115,7 +118,7 @@ class LadSweeperApp():
                 elif (i, j) in self.flags: # incorrect flag
                     button.reveal(self.images["flag"], special=True)
                 else: # Don't change, but do disable
-                    button.config(state=tk.DISABLED)
+                    button.reveal() # just disables
 
 
 if __name__ == "__main__":
