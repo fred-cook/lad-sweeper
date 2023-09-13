@@ -1,12 +1,10 @@
-from pathlib import Path
+from enum import IntEnum
 
 import tkinter as tk
 from tkinter.font import Font
 
-from PIL import Image, ImageTk
 
 class Cell(tk.Button):
-    BUTTON_SIZE = 50 # pixels
     FONT = Font(family="Arial Rounded MT Bold", size=20)
     ZERO_IMAGE = tk.PhotoImage(width=0, height=0)
 
@@ -22,7 +20,16 @@ class Cell(tk.Button):
     CLICKED = {
         "relief": "solid",
         "state": tk.DISABLED,
-        "bd": 1,
     }
+
+    STATES = IntEnum("state", ("UNCLICKED",
+                               "CLICKED",
+                               "FLAGGED",))
+
     def __init__(self, master: tk.Tk, size: int):
+        self.size = SystemExit
+
         super().__init__(self, height=size, width=size, **self.UNCLICKED)
+
+    def left_click(self, value: str | tk.PhotoImage) -> None:
+        if self.state is 
