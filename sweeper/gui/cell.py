@@ -86,8 +86,10 @@ class Cell(tk.Button):
         """
         if self.state is self.STATES.UNCLICKED:
             self.config(image=flag_image)
+            self.state = self.STATES.FLAGGED
         elif self.state is self.STATES.FLAGGED:
             self.config(**self.UNCLICKED)
+            self.state = self.STATES.UNCLICKED
 
     def reveal(self, image: tk.PhotoImage, special: bool=False) -> None:
         """
