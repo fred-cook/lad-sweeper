@@ -58,27 +58,20 @@ class Cell(tk.Button):
         super().__init__(master, height=size, width=size, **self.UNCLICKED)
         self.state = self.STATES.UNCLICKED
 
-    def left_click(self, digit: int=0, image: tk.PhotoImage | None=None,
-                   special: bool=False) -> None:
+    def left_click(self, value: int) -> None:
         """
         Called if a cell is left clicked. Only has effect if the
         cell state is unclicked
 
         Parameters
         ----------
-        digit: int
+        value: int
             The value of the cell, with a default of 0
-        image: tk.PhotoImage | None
-            Could be flag or bomb
-        special: bool
-            Used to highlight if it's the mine that triggered
-            the loss, or an incorrectly placed flag at the end
         """
         if self.state is self.STATES.UNCLICKED:
-            self.config(text=str(digit),
-                        fg=self.COLOURS[digit],
-                        image=image if image else self.ZERO_IMAGE,
-                        bg="red" if special else "gray")
+            self.config(text=str(value),
+                        fg=self.COLOURS[value],
+                        bg="gray")
             self.state = self.STATES.CLICKED
 
     def right_click(self, flag_image: tk.PhotoImage):
@@ -96,3 +89,19 @@ class Cell(tk.Button):
         elif self.state is self.STATES.FLAGGED:
             self.config(**self.UNCLICKED)
 
+    def reveal(self, image: tk.PhotoImage, special: bool=False) -> None:
+        """
+        Reveal the cell on game being won or lost.
+
+        Parameters
+        ----------
+        image: tk.PhotoImage | None
+            Could be lad or bomb
+        special: bool
+            Used to highlight if it's the mine that triggered
+            the loss, or an incorrectly placed flag at the end
+        """
+        self.config(image=image,
+                    **self.CLICKED,
+                    bg="red" if special else "gray")
+        self.state = self.STATES.CLICKED
