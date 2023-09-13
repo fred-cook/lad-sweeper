@@ -11,6 +11,7 @@ import numpy as np
 from sweeper.lad_sweeper import LadSweeper
 
 from sweeper.gui.image_handler import ImageHandler
+from sweeper.gui.cell import Cell
 
 
 root = tk.Tk()
@@ -18,39 +19,7 @@ root = tk.Tk()
 
 class LadSweeperApp():
 
-    BUTTON_SIZE = 50 # pixels
-    FONT = Font(family="Arial Rounded MT Bold", size=20)
-    ZERO_IMAGE = tk.PhotoImage(width=0, height=0)
-
-    colours = {1: "blue",
-               2: "green",
-               3: "red",
-               4: "Purple",
-               5: "Maroon",
-               6: "Turquoise",
-               7: "black",
-               8: "gray"}
-    
-    UNCLICKED = {
-        "text": '',
-        "font": FONT,
-        "image": tk.PhotoImage(width=0, height=0),
-        "relief": "raised",
-        #"bg": "#f2cd7e",
-        "state": tk.ACTIVE,
-        "compound": "center",
-        "height": BUTTON_SIZE,
-        "width": BUTTON_SIZE,
-    }
-
-    CLICKED = {
-        "relief": "solid",
-        #"bg": "#fcfbf7",
-        "state": tk.DISABLED,
-        "width": BUTTON_SIZE - 2,
-        "height": BUTTON_SIZE - 2,
-        "bd": 1,
-    }
+    CELL_SIZE = 50 # pixels
 
     def __init__(self,
                  master: tk.Tk,
@@ -62,7 +31,7 @@ class LadSweeperApp():
         self.shape = shape
         self.num_mines = num_mines
         self.game = LadSweeper(shape=shape, num_mines=num_mines)
-        self.images = ImageHandler(self.BUTTON_SIZE)
+        self.images = ImageHandler(self.CELL_SIZE)
 
         self.new_game_button: tk.Button
         self.banner = self.make_banner(master)
@@ -78,8 +47,8 @@ class LadSweeperApp():
         banner = tk.Frame(master)
         self.new_game_button = tk.Button(banner,
                                       image=self.images["lad"],
-                                      height=self.BUTTON_SIZE,
-                                      width=self.BUTTON_SIZE,
+                                      height=self.CELL_SIZE,
+                                      width=self.CELL_SIZE,
                                       command=self.new_game)
         self.new_game_button.pack()
         return banner
@@ -100,7 +69,7 @@ class LadSweeperApp():
         
         for i in range(rows):
             for j in range(columns):
-                button = tk.Button(master=master, **self.UNCLICKED)
+                button = Cell(master=master, size=self.CELL_SIZE)
                 buttons[i].append(button)
                 buttons[i][j].bind("<Button-1>", lambda _, coord=(i, j): self.on_click(coord))
                 buttons[i][j].bind("<Button-3>", lambda _, coord=(i, j): self.on_right_click(coord))
@@ -108,17 +77,10 @@ class LadSweeperApp():
         return buttons
 
     def on_click(self, coord: Tuple[int, int]):
-        if (self.game.game_won is False or
-            self.buttons[coord[0]][coord[1]].cget("relief") == "solid" or
-            coord in self.flags):
-            return
-
         for i, j in self.game.click_cell(coord):
             value = self.game.board[i, j]
             if value:
-                self.buttons[i][j].config(text=str(value),
-                                          fg=self.colours[value])
-            self.buttons[i][j].config(**self.CLICKED)
+                self.buttons[i][j].left_click(value)
         if self.game.game_won is not None:
             self.reveal_board(coord) # need the coord incase it was a mine
         
@@ -127,13 +89,11 @@ class LadSweeperApp():
         Toggle a flag on the cell
         """
         i, j = coord
-        if self.game.visible[coord]:
-            return
         if coord in self.flags:
-            self.buttons[i][j].config(image=self.ZERO_IMAGE)
+            self.buttons[i][j].right_click(self.images["flag"])
             self.flags.remove(coord)
-        else:
-            self.buttons[i][j].config(image=self.images["flag"])
+        elif self.buttons[i][j].state is self.buttons[i][j].STATES.UNCLICKED:
+            self.buttons[i][j].right_click(self.images["flag"])
             self.flags.append(coord)
 
     def reveal_board(self, coord: Tuple[int, int]):
@@ -152,14 +112,14 @@ class LadSweeperApp():
                 if value < 0:
                     if (i, j) in self.flags:
                         continue
-                    button.config(image=img,
-                                  relief="solid")
-                elif (i, j) in self.flags:
-                    button.config(bg="red")
-                else:
-                    self.on_click((i, j))
-        if self.game.game_won is False:
-            self.buttons[coord[0]][coord[1]].config(bg="red")
+                    if (i, j) == coord: # losing mine
+                        button.reveal(img, special=True)
+                    else:
+                        button.reveal(img)
+                elif (i, j) in self.flags: # incorrect flag
+                    button.reveal(self.images["flag"], special=True)
+                else: # Don't change, but do disable
+                    button.config(state=tk.DISABLED)
 
 
 if __name__ == "__main__":
