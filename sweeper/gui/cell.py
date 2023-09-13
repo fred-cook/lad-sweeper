@@ -11,8 +11,6 @@ class Cell(tk.Button):
     Any images/values to be displayed are passed in, instead
     of holding a reference to the images in every cell
     """
-    ZERO_IMAGE = tk.PhotoImage(width=0, height=0)
-
     COLOURS = {
                0: "white",
                1: "blue",
@@ -26,7 +24,6 @@ class Cell(tk.Button):
 
     UNCLICKED = {
         "text": '',
-        "image": ZERO_IMAGE,
         "relief": "raised",
         "state": tk.ACTIVE,
         "compound": "center", #  Will show images and text
@@ -42,7 +39,7 @@ class Cell(tk.Button):
                                "CLICKED",
                                "FLAGGED",))
 
-    def __init__(self, master: tk.Tk, size: int, font: Font):
+    def __init__(self, master: tk.Tk, size: int):
         """
         Parameters
         ----------
@@ -51,6 +48,11 @@ class Cell(tk.Button):
         size: int
             Size of the cell in pixels
         """
+        font = Font(family="Arial Rounded MT Bold", size=20)
+        zero_image = tk.PhotoImage(width=0, height=0)
+        self.UNCLICKED["font"] = font
+        self.UNCLICKED["image"] = zero_image
+        
         self.size = size #  [pixels]
 
         super().__init__(master, height=size, width=size, **self.UNCLICKED)
