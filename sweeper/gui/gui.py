@@ -17,6 +17,7 @@ from sweeper.gui.cell import Cell
 class LadSweeperApp():
 
     CELL_SIZE = 50 # pixels
+    FONT = Font(family="Arial Rounded MT Bold", size=20)
 
     def __init__(self,
                  master: tk.Tk,
@@ -66,7 +67,7 @@ class LadSweeperApp():
         
         for i in range(rows):
             for j in range(columns):
-                button = Cell(master=master, size=self.CELL_SIZE)
+                button = Cell(master=master, size=self.CELL_SIZE, font=self.FONT)
                 buttons[i].append(button)
                 buttons[i][j].bind("<Button-1>", lambda _, coord=(i, j): self.on_click(coord))
                 buttons[i][j].bind("<Button-3>", lambda _, coord=(i, j): self.on_right_click(coord))
