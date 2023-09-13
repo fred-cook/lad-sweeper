@@ -11,7 +11,6 @@ class Cell(tk.Button):
     Any images/values to be displayed are passed in, instead
     of holding a reference to the images in every cell
     """
-    FONT = Font(family="Arial Rounded MT Bold", size=20)
     ZERO_IMAGE = tk.PhotoImage(width=0, height=0)
 
     COLOURS = {
@@ -27,7 +26,6 @@ class Cell(tk.Button):
 
     UNCLICKED = {
         "text": '',
-        "font": FONT,
         "image": ZERO_IMAGE,
         "relief": "raised",
         "state": tk.ACTIVE,
@@ -44,7 +42,7 @@ class Cell(tk.Button):
                                "CLICKED",
                                "FLAGGED",))
 
-    def __init__(self, master: tk.Tk, size: int):
+    def __init__(self, master: tk.Tk, size: int, font: Font):
         """
         Parameters
         ----------
@@ -56,6 +54,7 @@ class Cell(tk.Button):
         self.size = size #  [pixels]
 
         super().__init__(master, height=size, width=size, **self.UNCLICKED)
+        self.config(font=font)
         self.state = self.STATES.UNCLICKED
 
     def left_click(self, value: int) -> None:
@@ -107,3 +106,6 @@ class Cell(tk.Button):
                     **self.CLICKED,
                     bg="red" if special else "gray")
         self.state = self.STATES.CLICKED
+
+    def reset(self):
+        self.config(**self.UNCLICKED)

@@ -14,9 +14,6 @@ from sweeper.gui.image_handler import ImageHandler
 from sweeper.gui.cell import Cell
 
 
-root = tk.Tk()
-
-
 class LadSweeperApp():
 
     CELL_SIZE = 50 # pixels
@@ -62,7 +59,7 @@ class LadSweeperApp():
     def reset_buttons(self):
         for row in self.buttons:
             for button in row:
-                button.config(**self.UNCLICKED)
+                button.reset()
 
     def make_buttons(self, master, rows, columns) -> List[List[tk.Button]]:
         buttons = [[] for _  in range(rows)]
@@ -123,6 +120,7 @@ class LadSweeperApp():
 
 
 if __name__ == "__main__":
+    root = tk.Tk()
     app = LadSweeperApp(root, (10, 10), 15)
     print(app.game._board)
     root.mainloop()
