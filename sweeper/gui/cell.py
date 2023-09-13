@@ -52,7 +52,7 @@ class Cell(tk.Button):
         zero_image = tk.PhotoImage(width=0, height=0)
         self.UNCLICKED["font"] = font
         self.UNCLICKED["image"] = zero_image
-        
+
         self.size = size #  [pixels]
 
         super().__init__(master, height=size, width=size, **self.UNCLICKED)
@@ -70,7 +70,7 @@ class Cell(tk.Button):
             The value of the cell, with a default of 0
         """
         if self.state is self.STATES.UNCLICKED:
-            self.config(text=str(value),
+            self.config(text=str(value) if value > 0 else '',
                         fg=self.COLOURS[value],
                         bg="gray")
             self.state = self.STATES.CLICKED
