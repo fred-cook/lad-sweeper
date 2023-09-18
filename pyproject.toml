@@ -7,8 +7,8 @@ license = "GNU2"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.7"
-numpy = "^1.25"
+python = "^3.9"
+numpy = "^1.24"
 pillow = "^9.4.0"
 
 
