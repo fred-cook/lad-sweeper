@@ -86,8 +86,8 @@ class GridGenerator:
             2D array of 1D mine coordinates with shape
             (N, self.num_mines)
         """
-        return np.vstack([self.rng.permutation(self.size)
-                          for _ in range(N)])[:,:self.num_mines]
+        coords = np.arange(self.size, dtype=np.int8) * np.ones(N, dtype=np.int8)[:,None]
+        return self.rng.permuted(coords, axis=1)[:, :self.num_mines]
 
     def generate_n_mined_boards(self, N: int) -> np.array:
         """
