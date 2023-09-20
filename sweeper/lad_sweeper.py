@@ -29,6 +29,7 @@ class LadSweeper:
         """
         self._shape = shape
         self._num_mines = num_mines
+        self._size = shape[0] * shape[1]
 
         self.shape = shape
         self.num_mines = num_mines
