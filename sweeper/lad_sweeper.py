@@ -32,7 +32,7 @@ class LadSweeper:
         self._size = shape[0] * shape[1]
 
         self.shape = shape
-        self.num_mines = num_mines
+        self.num_mines = num_mines # make sure value is legit
 
         self.grid_generator = GridGenerator(grid_shape=shape, num_mines=num_mines)
 
