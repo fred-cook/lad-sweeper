@@ -1,77 +1,111 @@
-from typing import Tuple
-
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 class GridGenerator:
     """
-    A small class to generate lad sweeper grids.
+    A method to generate lad-sweeper grids
 
-    Grids are 2d NumPy arrays with -1 denoting a mine
-    and a count for the number of adjacent mines.
+    The class can be treated as an iterator, eg. make a
+    lad-sweeper grid:
+    >>> gen = GridGenerator()
+    >>> grid = next(gen)
 
-    To generate a list of grids use the following:
-    >>> grid_gen = GridGenerator()
-    >>> my_grids = [next(grid_gen) for _ in range(10)]
+    However, to make many grids at once call the `generate_n_grids`
+    method with the desired number.
+
+    Method
+    ------
+    1. Generate N sets of shuffled coordinates 1D coordinates.
+       Return the first `num_mines` from each set of coordinates
+    2. Insert the N coordinates into a 3D pre-made stack of grids
+       with a NumPy strided view into it of all the neighbours.
+    3. Take the absolute value of the sum of all the neighbours
+    4. Put the mines back in place
     """
-    def __init__(self,
-                 grid_shape: Tuple[int, int] = (16, 16),
-                 num_mines: int = 44):
-        """
-        Parameters
-        ----------
-        grid_shape: Tuple[int, int]
-            The number of rows and columns which will make up the grid
-        num_mines: int
-            The number of mines the grid should contain
-        """
+    def __init__(self, grid_shape=(16, 16), num_mines=44):
         self.grid_shape = grid_shape
-        self.size = grid_shape[0] * grid_shape[1]
-        self.num_mines = min(self.size, num_mines)
+        self.rows, self.columns = grid_shape
+        self.size = self.rows * self.columns
+        self.num_mines = num_mines
 
-        # Set up a padded grid which allows a strided view of every
-        # cell's neighbours
-        padded_shape = (grid_shape[0] + 2, grid_shape[1] + 2)
-        neighbours_shape = (grid_shape[0], grid_shape[1], 3, 3)
-
-        self.padded_grid = np.zeros(padded_shape, dtype=np.int8)
-        self.neighbours = as_strided(self.padded_grid,
-                                     shape=neighbours_shape,
-                                     strides=self.padded_grid.strides * 2)
-        
-        # Store a list of coords
-        self.coords = np.indices(grid_shape).reshape(2, -1).T
+        self.rng = np.random.default_rng()
 
     def __iter__(self):
         return self
     
     def __next__(self):
-        return self.make_grid()
-        
-    def make_grid(self) -> np.ndarray:
+        return self.generate_n_grids(1)[0]
+
+    def generate_n_grids(self, N: int) -> np.ndarray:
         """
-        Make a grid with the specified shape
+        Generate N lad-sweeper grids
+
+        Parameters
+        ----------
+        N: int
+            The number of grids to make
 
         Returns
         -------
-        grid: np.ndarray
-            A filled grid
-
-        Method
-        ------
-        1. Shuffle the list of coords and take the first
-            `num_mines` from the top
-        2. Set those values into an array of zeros as -1
-        3. Embed that array into the padded grid
-        4. Take the absolute sum of all the neighbours
-        5. Reset the mines to -1
+        grids: np.ndarray
+            An array with shape (N, *self,shape)
         """
-        np.random.shuffle(self.coords) #  in place
-        board = np.zeros(self.grid_shape, dtype=np.int8)
-        board[tuple(self.coords[:self.num_mines].T)] = -1
+        # Make a 3D grid padded in the last 2 dimensions to store
+        # the mine values
+        padded_shape = (N, self.rows + 2, self.columns+2)
+        padded = np.zeros(padded_shape, dtype=np.int8)
 
-        self.padded_grid[1:-1, 1:-1] = board
-        counts = np.abs(np.sum(self.neighbours, axis=(3, 2)))
-        counts[tuple(self.coords[:self.num_mines].T)] = -1 # reset the mines
-        return counts
-    
+        # Make N grids with -1 for mines, 0 elsewhere
+        mined_grids = self.generate_n_mined_boards(N)
+        # Insert them into padded
+        padded[:,1:-1,1:-1] = mined_grids
+
+        # Create a strided view of the neighbours of each layer
+        strides = (padded.strides[0],) + padded.strides[1:]*2
+        new_shape = (N, self.rows, self.columns, 3, 3)
+        neighbours = as_strided(padded, new_shape, strides)
+
+        # Sum all of the neighbours over the last 2 axes
+        counts = np.abs(np.sum(neighbours, axis=(-1, -2)))
+
+        # Return summed value or mine
+        return np.where(mined_grids == -1, -1, counts)
+
+    def generate_n_coords(self, N: int) -> np.ndarray:
+        """
+        Return N rows of 1D coordinates containing mines
+
+        Parameters
+        ----------
+        N: int
+            Number of rows of mines to generate
+        
+        Returns
+        -------
+        mine_coords: np.ndarray
+            2D array of 1D mine coordinates with shape
+            (N, self.num_mines)
+        """
+        return np.vstack([self.rng.permutation(self.size)
+                          for _ in range(N)])[:,:self.num_mines]
+
+    def generate_n_mined_boards(self, N: int) -> np.array:
+        """
+        Return N 2D lad-sweeper boards with mines in place
+        but no counts
+
+        Parameters
+        ----------
+        N: int
+            Number of mined boards to make
+
+        Returns
+        -------
+        mined_grids: np.ndarray
+            Grids with mines in place but no counts
+        """
+        boards = np.zeros((N, self.size), dtype=np.int8)
+        rows = np.repeat(np.arange(N), self.num_mines)
+        mines = self.generate_n_coords(N)
+        boards[(rows.flatten(), mines.flatten())] = -1
+        return boards.reshape(N, *self.grid_shape)
