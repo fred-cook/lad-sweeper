@@ -3,57 +3,102 @@ import tkinter as tk
 import numpy as np
 
 class Digit(tk.Canvas):
-    COORDS = np.array([[-25, 0],
-                       [-20, 5],
-                       [20, 5],
-                       [25, 0],
-                       [20, -5],
-                       [-20, -5]])
+    r"""
+    7seg digit
 
+    Each segment has shape:
+            _________
+           /         \
+           \_________/
+    Their centre is defined as (0, 0), with half width/height
+    taken to the extremes from there. Width and height are
+    defined in this horizontal lay out
+
+    Segments are then numbered clockwise from the top, with
+    the centre seg the last value.
+    """
+    HALF_HEIGHT = 5 #  [px]
+    HALF_WIDTH = 25 #  [px]
+    HEIGHT = HALF_HEIGHT * 2
+    WIDTH = HALF_WIDTH * 2
+    POLYGON_COORDS = np.array([[-(HALF_WIDTH), 0],
+                               [-(HALF_WIDTH-HALF_HEIGHT), HALF_HEIGHT],
+                               [(HALF_WIDTH-HALF_HEIGHT), HALF_HEIGHT],
+                               [HALF_WIDTH, 0],
+                               [(HALF_WIDTH-HALF_HEIGHT), -HALF_HEIGHT],
+                               [-(HALF_WIDTH-HALF_HEIGHT), -HALF_HEIGHT]])
     ROT_MAT = np.array([[0, -1], [1, 0]])
-    COLOUR = "red"
+    ON_COLOUR = "#d60000"
+    OFF_COLOUR = "#783030"
+    BG = "#696969"
     NUMBERS = {0: (True, True, True, True, True, True, False),
-                1: (False, True, True, False, False, False, False),
-                2: (True, True, False, True, True, False, True),
-                3: (True, True, True, True, False, False, True),
-                4: (False, True, True, False, False, True, True),
-                5: (True, False, True, True, False, True, True),
-                6: (True, False, True, True, True, True, True),
-                7: (True, True, True, False, False, False, False),
-                8: (True, True, True, True, True, True, True),
-                9: (True, True, True, False, False, True, True),
+               1: (False, True, True, False, False, False, False),
+               2: (True, True, False, True, True, False, True),
+               3: (True, True, True, True, False, False, True),
+               4: (False, True, True, False, False, True, True),
+               5: (True, False, True, True, False, True, True),
+               6: (True, False, True, True, True, True, True),
+               7: (True, True, True, False, False, False, False),
+               8: (True, True, True, True, True, True, True),
+               9: (True, True, True, False, False, True, True),
                "-": (False, False, False, False, False, False, True),
-                None: (False,) * 7}
+               None: (False,) * 7}
     
     def __init__(self, master: tk.Tk):
-        super().__init__(master)
-        seg_coords = [[(30, 5), False],
-                      [(55, 30), True],
-                      [(55, 80), True],
-                      [(30, 105), False],
-                      [(5, 80), True],
-                      [(5, 30), True],
-                      [(30, 55), False]]
+        super().__init__(master,
+                         width=self.HEIGHT + self.WIDTH,
+                         height=2 * (self.HEIGHT + self.WIDTH),
+                         bg=self.BG)
 
-        for coord, rotated in seg_coords:
-            self.make_segment(coord, rotated)
-                               
+        seg_x_coords = (self.HALF_WIDTH + self.HALF_HEIGHT,  #  top seg
+                        self.WIDTH + self.HALF_HEIGHT,
+                        self.WIDTH + self.HALF_HEIGHT,
+                        self.HALF_WIDTH + self.HALF_HEIGHT,  #  bottom seg
+                        self.HALF_HEIGHT,
+                        self.HALF_HEIGHT,
+                        self.HALF_WIDTH + self.HALF_HEIGHT)  #  middle seg
+
+        seg_y_coords = (self.HALF_HEIGHT,
+                        self.HALF_WIDTH + self.HALF_HEIGHT,
+                        self.WIDTH + self.HALF_WIDTH + self.HALF_HEIGHT,
+                        self.WIDTH + self.WIDTH + self.HALF_HEIGHT,
+                        self.WIDTH + self.HALF_WIDTH + self.HALF_HEIGHT,
+                        self.HALF_WIDTH + self.HALF_HEIGHT,
+                        self.HALF_HEIGHT + self.WIDTH)
+
+        rotated = (False, True, True, False, True, True, False)
+
+        for x, y, rotated in zip(seg_x_coords, seg_y_coords, rotated):
+            self.make_segment((x, y), rotated)                            
 
     def make_segment(self, coord: tuple[int, int],
                      rotated: bool=False) -> None:
+        """
+        Draw the segments on the canvas. They can be accessed
+        by integer order of drawing starting at 1
+        """
         if rotated:
-            vertices = self.COORDS @ self.ROT_MAT
-            print(vertices)
+            vertices = self.POLYGON_COORDS @ self.ROT_MAT
         else:
-            vertices = self.COORDS.copy()
+            vertices = self.POLYGON_COORDS.copy()
         vertices += coord
         self.create_polygon(*vertices.flatten(),
-                            fill=self.COLOUR,
-                            outline="white")
+                            fill=self.OFF_COLOUR,
+                            outline=self.BG,
+                            width=2)
 
     def set_value(self, val: int | None) -> None:
-        for i, val in enumerate(self.NUMBERS[val], 1):
+        """
+        Set the display to val
+
+        valid values for val:
+            - [0-9]
+            - '-'
+            - None
+        Otherwise it defaults to None
+        """
+        for i, val in enumerate(self.NUMBERS.get(val, self.NUMBERS[None]), 1):
             if val:
-                self.itemconfig(i, fill="red")
+                self.itemconfig(i, fill=self.ON_COLOUR)
             else:
-                self.itemconfig(i, fill="gray")
+                self.itemconfig(i, fill=self.OFF_COLOUR)
