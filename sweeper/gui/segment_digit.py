@@ -30,7 +30,8 @@ class Digit(tk.Canvas):
     ROT_MAT = np.array([[0, -1], [1, 0]])
     ON_COLOUR = "#d60000"
     OFF_COLOUR = "#783030"
-    BG = "#696969"
+    PADDING = 4 #  [px]
+    BG = "black"
     NUMBERS = {'0': (True, True, True, True, True, True, False),
                '1': (False, True, True, False, False, False, False),
                '2': (True, True, False, True, True, False, True),
@@ -46,7 +47,7 @@ class Digit(tk.Canvas):
     
     def __init__(self, master: tk.Tk):
         super().__init__(master,
-                         width=self.HEIGHT + self.WIDTH,
+                         width=self.HEIGHT + self.WIDTH + self.PADDING,
                          height=2 * (self.HEIGHT + self.WIDTH),
                          bg=self.BG)
 
@@ -58,13 +59,13 @@ class Digit(tk.Canvas):
                         self.HALF_HEIGHT,
                         self.HALF_WIDTH + self.HALF_HEIGHT)  #  middle seg
 
-        seg_y_coords = (self.HALF_HEIGHT,
-                        self.HALF_WIDTH + self.HALF_HEIGHT,
-                        self.WIDTH + self.HALF_WIDTH + self.HALF_HEIGHT,
-                        self.WIDTH + self.WIDTH + self.HALF_HEIGHT,
-                        self.WIDTH + self.HALF_WIDTH + self.HALF_HEIGHT,
-                        self.HALF_WIDTH + self.HALF_HEIGHT,
-                        self.HALF_HEIGHT + self.WIDTH)
+        seg_y_coords = (self.HEIGHT,
+                        self.HALF_WIDTH + self.HEIGHT,
+                        self.WIDTH + self.HALF_WIDTH + self.HEIGHT,
+                        self.WIDTH + self.WIDTH + self.HEIGHT,
+                        self.WIDTH + self.HALF_WIDTH + self.HEIGHT,
+                        self.HALF_WIDTH + self.HEIGHT,
+                        self.HEIGHT + self.WIDTH)
 
         rotated = (False, True, True, False, True, True, False)
 
@@ -82,6 +83,7 @@ class Digit(tk.Canvas):
         else:
             vertices = self.POLYGON_COORDS.copy()
         vertices += coord
+        vertices[:,0] += self.PADDING
         self.create_polygon(*vertices.flatten(),
                             fill=self.OFF_COLOUR,
                             outline=self.BG,
