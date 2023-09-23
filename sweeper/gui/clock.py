@@ -31,9 +31,9 @@ class Clock(ThreeDigitDisplay):
         self.update_timer()
 
     def update_timer(self):
-        self.value=(int(time()-self.start_time))
         if self.stopped:
             return
+        self.value=(int(time()-self.start_time))
         self.master.after(self.UPDATE_TIME, self.update_timer)
 
     def stop_timer(self):

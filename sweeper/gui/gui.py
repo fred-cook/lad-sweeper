@@ -12,6 +12,7 @@ from sweeper.lad_sweeper import LadSweeper
 
 from sweeper.gui.image_handler import ImageHandler
 from sweeper.gui.cell import Cell
+from sweeper.gui.banner import Banner
 
 
 class LadSweeperApp():
@@ -30,9 +31,9 @@ class LadSweeperApp():
         self.game = LadSweeper(shape=shape, num_mines=num_mines)
         self.images = ImageHandler(self.CELL_SIZE)
 
-        self.new_game_button: tk.Button
-        self.banner = self.make_banner(master)
+        self.banner = Banner(master, self.num_mines, self.images["lad"])
         self.banner.pack(side=tk.TOP)
+        self.banner.new_game_button.bind("<Button-1>", self.new_game)
 
         self.buttons_frame = tk.Frame(master)
         self.buttons  = self.make_buttons(self.buttons_frame, *shape)
@@ -40,21 +41,11 @@ class LadSweeperApp():
         self.flags: List[Tuple[int, int]]=[]
 
 
-    def make_banner(self, master):
-        banner = tk.Frame(master)
-        self.new_game_button = tk.Button(banner,
-                                      image=self.images["lad"],
-                                      height=self.CELL_SIZE,
-                                      width=self.CELL_SIZE,
-                                      command=self.new_game)
-        self.new_game_button.pack()
-        return banner
-
-    def new_game(self):
+    def new_game(self, event: tk.Event):
         self.game.new_game()
         self.reset_buttons()
         self.flags = []
-        self.new_game_button.config(image=self.images["lad"])
+        self.banner.new_game_button.config(image=self.images["lad"])
 
     def reset_buttons(self):
         for row in self.buttons:
@@ -81,6 +72,7 @@ class LadSweeperApp():
             self.buttons[i][j].left_click(value)
         if self.game.game_won is not None:
             self.reveal_board(coord) # need the coord incase it was a mine
+        self.banner.clock.start_timer()
         
     def on_right_click(self, coord):
         """
@@ -90,19 +82,21 @@ class LadSweeperApp():
         if coord in self.flags:
             self.buttons[i][j].right_click(self.images["flag"])
             self.flags.remove(coord)
+            self.banner.mine_counter.raise_count()
         elif self.buttons[i][j].state is self.buttons[i][j].STATES.UNCLICKED:
             self.buttons[i][j].right_click(self.images["flag"])
             self.flags.append(coord)
+            self.banner.mine_counter.lower_count()
 
     def reveal_board(self, coord: Tuple[int, int]):
         """
         On the game being won / lost reveal the board
         """
         if self.game.game_won is True:
-            self.new_game_button.config(image=self.images["winning_lad"])
+            self.banner.new_game_button.config(image=self.images["winning_lad"])
             img = self.images["lad"]
         else:
-            self.new_game_button.config(image=self.images["lad_rear"])
+            self.banner.new_game_button.config(image=self.images["lad_rear"])
             img = self.images["dead_lad"]
         for i, row in enumerate(self.buttons):
             for j, button in enumerate(row):
@@ -119,6 +113,7 @@ class LadSweeperApp():
                     button.reveal(self.images["flag"], special=True)
                 else: # Don't change, but do disable
                     button.reveal() # just disables
+        self.banner.clock.stop_timer()
 
 
 if __name__ == "__main__":
