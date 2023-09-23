@@ -31,7 +31,7 @@ class Cell(tk.Button):
     }
 
     CLICKED = {
-        "relief": "solid",
+        "relief": "flat",
     }
 
     STATES = IntEnum("state", ("UNCLICKED",
@@ -113,3 +113,7 @@ class Cell(tk.Button):
         """Reset to start values"""
         self.config(height=self.size, width=self.size, **self.UNCLICKED)
         self.state = self.STATES.UNCLICKED
+
+    def disable(self):
+        """No more clicks"""
+        self.state = self.STATES.CLICKED
