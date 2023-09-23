@@ -3,6 +3,8 @@ from itertools import product
 
 import numpy as np
 
+from sweeper.data.grid_generator import GridGenerator
+
 class LadSweeper:
     """
     I've crammed minesweeper into this class. Could probably
@@ -20,48 +22,57 @@ class LadSweeper:
 
         Parameters
         ----------
-        :shape: tuple of ints giving the board shape (rows, columns)
-        :num_mines: int for the number of mines to put in the grid
+        shape: tuple[int, int]
+            Lad-sweeper grid shape
+        num_mines: int
+            Number of mines to place in the lad-sweeper grid
         """
+        self._shape = shape
+        self._num_mines = num_mines
+        self._size = shape[0] * shape[1]
+
         self.shape = shape
-        self.num_mines = num_mines # could error check this
-        self.size = shape[0] * shape[1]
+        self.num_mines = num_mines # make sure value is legit
+
+        self.grid_generator = GridGenerator(grid_shape=shape, num_mines=num_mines)
 
         # None if game in progress, True if win, False if lost
-        self.game_won: Union[None, bool]
+        self.game_won: bool | None = None
 
         self._board: np.ndarray
         self.visible: np.ndarray
 
         self.new_game()
 
+    @property
+    def shape(self) -> tuple[int, int]:
+        return self._shape
+    
+    @shape.setter
+    def shape(self, value: tuple[int, int]):
+        self._shape = value
+        self._size = value[0] * value[1]
+        self.grid_generator = GridGenerator(grid_shape=self.shape,
+                                            num_mines=self.num_mines)
+
+    @property
+    def size(self) -> int:
+        return self._size
+    
+    @property
+    def num_mines(self) -> int:
+        return self._num_mines
+    
+    @num_mines.setter
+    def num_mines(self, value: int):
+        self._num_mines = min(1, max(value, self.size))
+        self.grid_generator = GridGenerator(grid_shape=self.shape,
+                                            num_mines=self.num_mines)
+
     def new_game(self) -> None:
-        self._board = self.create_board()
+        self._board = next(self.grid_generator)
         self.visible = np.zeros(self.shape, dtype=np.int8)
         self.game_won = None
-
-    def create_board(self) -> np.ndarray:
-        """
-        Create a new board, with random mine placements and
-        numbers for the non-mine cells
-        """
-        board = np.zeros(self.shape, dtype=np.int8)
-        board[self.random_mine_coords()] = -1
-        counts = [[np.abs(np.sum(board[self.get_neighbours_np((i, j))]))
-                   for j in range(len(row))]
-                   for i, row in enumerate(board)]
-        return np.where(board < 0, board, counts)
-
-    def random_mine_coords(self) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Return a list of coords for mines to be placed by
-        shuffling a 1d list of integers 0 -> self.size and
-        ravelling them back to 2d coordinates
-        """
-        all_coords = np.arange(self.size)
-        np.random.shuffle(all_coords)
-        mines = all_coords[:self.num_mines]
-        return (mines // self.shape[1], mines % self.shape[1])
 
     def get_neighbours(self,
                        coord: Tuple[int, int]) -> Tuple[Tuple[int, int]]:
@@ -100,8 +111,7 @@ class LadSweeper:
         Update the gamestate corresponding to the
         value of the revealed cell.
         """
-        result = self.reveal_cell(coord)
-        print(len(result))
+        result = self.recurse(coord)
         if self.check_win():
             self.game_won = True
         if len(result) == 0: # Gameover
@@ -109,31 +119,17 @@ class LadSweeper:
             self.visible[:, :] = 1
         return result
 
-    def reveal_cell(self,
-                   coord: Tuple[int, int]) -> Set[Tuple[int, int]]:
+    def recurse(self, coord: Tuple[int, int],
+                found: set[Tuple[int, int]] | None=None) -> Set[Tuple[int, int]]:
         """
-        Update self._visible to reveal the cell.
-        
-        if the cell is 0 recursively reveal the board until
-        all linked 0 cells are revealed.
-
-        Parameters
-        ----------
-        coord: Tuple[int, int]
-            (row, column) co-ordinate of the cell to click
+        Recursively reveal cells around a clicked cell.
 
         Returns
         -------
-        Set[Tuple[int, int]]
-            A list of board co-ordinates to reveal
-            If a mine is clicked the list is empty
-        """
-        return self.recurse(coord)
-
-    def recurse(self, coord: Tuple[int, int],
-                found=None) -> Set[Tuple[int, int]]:
-        """
-        Recursively reveal cells around a clicked cell.
+        coords: set[Tuple[int, int]]
+            - empty if game over (mine was clicked)
+            - single tuple for a number clicked
+            - several tuples if a 0 was clicked
         """
         if self._board[coord] < 0:
             return set() # Game over
