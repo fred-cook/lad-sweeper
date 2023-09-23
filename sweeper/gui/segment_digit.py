@@ -31,16 +31,16 @@ class Digit(tk.Canvas):
     ON_COLOUR = "#d60000"
     OFF_COLOUR = "#783030"
     BG = "#696969"
-    NUMBERS = {0: (True, True, True, True, True, True, False),
-               1: (False, True, True, False, False, False, False),
-               2: (True, True, False, True, True, False, True),
-               3: (True, True, True, True, False, False, True),
-               4: (False, True, True, False, False, True, True),
-               5: (True, False, True, True, False, True, True),
-               6: (True, False, True, True, True, True, True),
-               7: (True, True, True, False, False, False, False),
-               8: (True, True, True, True, True, True, True),
-               9: (True, True, True, False, False, True, True),
+    NUMBERS = {'0': (True, True, True, True, True, True, False),
+               '1': (False, True, True, False, False, False, False),
+               '2': (True, True, False, True, True, False, True),
+               '3': (True, True, True, True, False, False, True),
+               '4': (False, True, True, False, False, True, True),
+               '5': (True, False, True, True, False, True, True),
+               '6': (True, False, True, True, True, True, True),
+               '7': (True, True, True, False, False, False, False),
+               '8': (True, True, True, True, True, True, True),
+               '9': (True, True, True, False, False, True, True),
                "-": (False, False, False, False, False, False, True),
                None: (False,) * 7}
     
@@ -87,7 +87,7 @@ class Digit(tk.Canvas):
                             outline=self.BG,
                             width=2)
 
-    def set_value(self, val: int | None) -> None:
+    def set_value(self, val: str | None) -> None:
         """
         Set the display to val
 
