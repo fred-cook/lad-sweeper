@@ -1,4 +1,3 @@
-from typing import Union, Tuple, Set, List
 from itertools import product
 
 import numpy as np
@@ -15,7 +14,7 @@ class LadSweeper:
                   if not (i == j == 0)] #  lmao
 
     def __init__(self,
-                 shape: Tuple[int, int]=(16, 32),
+                 shape: tuple[int, int]=(16, 32),
                  num_mines: int=99):
         """
         The default values are for 'expert' lad sweeper
@@ -75,7 +74,7 @@ class LadSweeper:
         self.game_won = None
 
     def get_neighbours(self,
-                       coord: Tuple[int, int]) -> Tuple[Tuple[int, int]]:
+                       coord: tuple[int, int]) -> tuple[tuple[int, int]]:
         """
         Given a cell coordinate as input return a list of valid
         neighbouring coordinates. Returned in format for
@@ -87,7 +86,7 @@ class LadSweeper:
         return neighbours
 
     def get_neighbours_np(self,
-                          coord: Tuple[int, int]) -> Tuple[Tuple[int, int]]:
+                          coord: tuple[int, int]) -> tuple[tuple[int, int]]:
         """
         Return neighbours in a format that can be fancy indexed
         straight into a numpy array
@@ -104,7 +103,7 @@ class LadSweeper:
         return False
 
     def click_cell(self,
-                   coord: Tuple[int, int]) -> Set[Tuple[int, int]]:
+                   coord: tuple[int, int]) -> set[tuple[int, int]]:
         """
         Pass on a cell coordinate to the board.
 
@@ -119,8 +118,8 @@ class LadSweeper:
             self.visible[:, :] = 1
         return result
 
-    def recurse(self, coord: Tuple[int, int],
-                found: set[Tuple[int, int]] | None=None) -> Set[Tuple[int, int]]:
+    def recurse(self, coord: tuple[int, int],
+                found: set[tuple[int, int]] | None=None) -> set[tuple[int, int]]:
         """
         Recursively reveal cells around a clicked cell.
 
